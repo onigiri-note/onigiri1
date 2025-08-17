@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, query, onSnapshot, setDoc, doc, getDoc } from 'firebase/firestore';
@@ -242,20 +242,20 @@ const App = () => {
     };
 
     // --- 各フォームの変更ハンドラ ---
-    const handleWeightChange = (type, field, value) => {
-        setDailyRecord(prev => ({
-            ...prev,
-            weights: {
-                ...prev.weights,
-                [type]: {
-                    ...(prev.weights[type] || {}), // nullチェック
-                    [field]: value
-                }
-            }
-        }));
-    };
+    const handleWeightChange = useCallback((type, field, value) => {
+      setDailyRecord(prev => ({
+          ...prev,
+          weights: {
+              ...prev.weights,
+              [type]: {
+                  ...(prev.weights[type] || {}),
+                  [field]: value
+              }
+          }
+      }));
+  }, [setDailyRecord]);
 
-    const handleMealMenuChange = (mealType, index, value) => {
+    const handleMealMenuChange = useCallback((mealType, index, value) => {
         setDailyRecord(prev => {
             const newMenus = [...(prev.meals[mealType]?.menus || Array(5).fill(''))];
             newMenus[index] = value;
@@ -267,9 +267,9 @@ const App = () => {
                 }
             };
         });
-    };
+    }, [setDailyRecord]);
 
-    const handleMealAlcoholChange = (mealType, index, field, value) => {
+    const handleMealAlcoholChange = useCallback((mealType, index, field, value) => {
         setDailyRecord(prev => {
             const newAlcohols = [...(prev.meals[mealType]?.alcohols || Array(5).fill({ degree: '', amount: '' }))];
             newAlcohols[index] = { ...newAlcohols[index], [field]: value };
@@ -281,10 +281,10 @@ const App = () => {
                 }
             };
         });
-    };
+    }, [setDailyRecord]);
     
     // 画像圧縮とアップロードの新しいハンドラ
-    const handlePhotoUpload = (mealType, index, file) => {
+    const handlePhotoUpload = useCallback((mealType, index, file) => {
         if (!file) return;
 
         const reader = new FileReader();
@@ -337,10 +337,10 @@ const App = () => {
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
-    };
+    }, [setDailyRecord]);
 
     // 写真を削除
-    const handleRemovePhoto = (mealType, index) => {
+    const handleRemovePhoto = useCallback((mealType, index) => {
         setDailyRecord(prev => {
             const newPhotos = [...(prev.meals[mealType]?.photos || Array(2).fill(null))];
             newPhotos[index] = null;
@@ -352,7 +352,7 @@ const App = () => {
                 }
             };
         });
-    };
+    }, [setDailyRecord]);
 
     // アルコール量の合計を計算
     const getTotalAlcohol = (alcohols) => {
@@ -758,10 +758,10 @@ const App = () => {
             )}
     
             <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
-                <header className="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4">
+            <header className="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4">
                     <h1 className="text-4xl font-extrabold text-gray-800 mb-2 md:mb-0">
-                        <span role="img" aria-label="note" className="mr-2">📝</span>
-                        ライフログノート
+                        <span role="img" aria-label="onigiri" className="mr-2">🍙</span>
+                        おにぎりノート
                     </h1>
                     <div className="flex items-center space-x-2">
                         <button
