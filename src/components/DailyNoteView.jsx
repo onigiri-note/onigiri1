@@ -55,7 +55,7 @@ const DailyNoteView = ({
                     step="0.1"
                     value={dailyRecord.weights[i === 0 ? 'morning' : i === 1 ? 'evening' : 'other']?.value || ''}
                     onChange={(e) => handleWeightChange(i === 0 ? 'morning' : i === 1 ? 'evening' : 'other', 'value', e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                    className="w-full mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                   />
                 </div>
                 <div>
@@ -71,7 +71,7 @@ const DailyNoteView = ({
                     <button
                       type="button"
                       onClick={() => handleWeightChange(i === 0 ? 'morning' : i === 1 ? 'evening' : 'other', 'time', format(new Date(), 'HHmm'))}
-                      className="ml-2 px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors"
+                      className="w-full ml-2 px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors"
                     >
                       現在時刻
                     </button>
@@ -83,7 +83,7 @@ const DailyNoteView = ({
                     <select
                       value={dailyRecord.weights[i === 0 ? 'morning' : i === 1 ? 'evening' : 'other']?.option1 || ''}
                       onChange={(e) => handleWeightChange(i === 0 ? 'morning' : i === 1 ? 'evening' : 'other', 'option1', e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                      className="w-full mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                     >
                       <option value="">選択してください</option>
                       <option value="起床後">起床後</option>
