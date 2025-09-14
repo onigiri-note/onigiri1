@@ -273,7 +273,31 @@ const App = () => {
         });
     }, []);
 
-    const handlePhotoUpload = ((mealType, index, file) => { /* 写真アップロードのロジックは省略 */ }, []);
+    const handlePhotoUpload = (mealType, index, file) => { /* 写真アップロードのロジックは省略 */
+        console.log('1. 写真アップロード開始', file); // ★追加
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            console.log('2. FileReader 読み込み完了'); // ★追加
+            const img = new Image();
+            img.onload = () => {
+                console.log('3. Image オブジェクト読み込み完了'); // ★追加
+                // ...canvas処理...
+                canvas.toBlob((blob) => {
+                    console.log('4. Canvas Blob生成完了'); // ★追加
+                    // ...
+                    reader.onloadend = () => {
+                        const base64data = reader.result;
+                        console.log('5. Base64変換完了、stateを更新します'); // ★追加
+                        setDailyRecord(prev => { /* ... */ });
+                    };
+                }, 'image/webp', 0.8);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
     const handleRemovePhoto = ((mealType, index) => { /* 写真削除のロジックは省略 */ }, []);
 
 
