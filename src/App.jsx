@@ -299,7 +299,7 @@ const App = () => {
     }, [allRecords, graphViewRange]);
 
     return (
-        <div className="min-h-screen bg-gray-100 p-4 font-inter">
+        <div className="min-h-screen bg-gray-100 p-4 font-inter flex items-center justify-center">
             {message && (
                 <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md z-50">
                     {message}
