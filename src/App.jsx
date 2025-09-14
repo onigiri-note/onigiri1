@@ -273,8 +273,8 @@ const App = () => {
         });
     }, []);
 
-    const handlePhotoUpload = useCallback((mealType, index, file) => { /* 写真アップロードのロジックは省略 */ }, []);
-    const handleRemovePhoto = useCallback((mealType, index) => { /* 写真削除のロジックは省略 */ }, []);
+    const handlePhotoUpload = ((mealType, index, file) => { /* 写真アップロードのロジックは省略 */ }, []);
+    const handleRemovePhoto = ((mealType, index) => { /* 写真削除のロジックは省略 */ }, []);
     
     const getTotalAlcohol = useCallback((alcohols) => {
         return alcohols?.reduce((sum, a) => sum + (parseFloat(a.degree || 0) / 100) * parseFloat(a.amount || 0), 0) || 0;

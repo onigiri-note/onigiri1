@@ -121,7 +121,7 @@ const DailyNoteView = ({
         {/* 食事の記録 */}
         <div>
           <h3 className="text-xl font-bold text-gray-700 mb-2 flex items-center"><Camera className="w-5 h-5 mr-2" />食事の記録</h3>
-          {['朝', '昼', '夜'].map((type, i) => (
+          {['朝', '昼', '夕'].map((type, i) => (
             <div key={i} className="bg-white p-4 rounded-lg shadow-sm mb-2">
               <div className="font-semibold text-gray-600 mb-2">{type}食</div>
               {/* メニュー入力 */}
