@@ -16,6 +16,9 @@ const DailyNoteView = ({
   handleMealAlcoholChange,
   handlePhotoUpload,
   handleRemovePhoto,
+  handleOvertimeChange={handleOvertimeChange}, // ← 追加
+  handleDiaryChange={handleDiaryChange},  
+  onChange=(onChange),     // ← 追加
   getTotalAlcohol
 }) => {  // ★★★ 変更点1：丸カッコ () が波カッコ {} に変わります ★★★
 
@@ -210,7 +213,7 @@ const DailyNoteView = ({
           <div className="bg-white p-4 rounded-lg shadow-sm">
             <select
               value={dailyRecord.overtime.type}
-              onChange={(e) => setDailyRecord(prev => ({ ...prev, overtime: { ...prev.overtime, type: e.target.value, hours: e.target.value === '任意' ? prev.overtime.hours : parseFloat(e.target.value) || 0 } }))}
+              onChange={handleOvertimeChange}
               className="block w-full rounded-md border-gray-300 shadow-sm"
             >
               <option value="0時間">0時間</option>
@@ -237,7 +240,7 @@ const DailyNoteView = ({
           <h3 className="text-xl font-bold text-gray-700 mb-2 flex items-center"><FileText className="w-5 h-5 mr-2" />簡単な日記</h3>
           <textarea
             value={dailyRecord.diary}
-            onChange={(e) => setDailyRecord(prev => ({ ...prev, diary: e.target.value.slice(0, 200) }))}
+            onChange={handleDiaryChange}
             rows="4"
             maxLength="200"
             className="block w-full rounded-md border-gray-300 shadow-sm"

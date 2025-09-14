@@ -221,7 +221,7 @@ const App = () => {
 
     const daysOfMonth = useMemo(() => eachDayOfInterval({ start: startOfMonth(currentMonth), end: endOfMonth(currentMonth) }), [currentMonth]);
     const firstDay = useMemo(() => getDay(startOfMonth(currentMonth)), [currentMonth]);
-    
+
     const dayHasRecord = useCallback((date) => {
         const dateKey = format(date, 'yyyy-MM-dd');
         return !!allRecords[dateKey];
@@ -252,16 +252,16 @@ const App = () => {
     }, [db, userId, selectedDate, dailyRecord]);
 
     const handleExportCSV = useCallback(() => { /* CSVエクスポートのロジックは省略 */ }, [allRecords]);
-    
+
     const handleWeightChange = useCallback((type, field, value) => {
-        setDailyRecord(prev => ({...prev, weights: {...prev.weights, [type]: {...(prev.weights[type] || {}), [field]: value}}}));
+        setDailyRecord(prev => ({ ...prev, weights: { ...prev.weights, [type]: { ...(prev.weights[type] || {}), [field]: value } } }));
     }, []);
 
     const handleMealMenuChange = useCallback((mealType, index, value) => {
         setDailyRecord(prev => {
             const newMenus = [...(prev.meals[mealType]?.menus || Array(5).fill(''))];
             newMenus[index] = value;
-            return {...prev, meals: {...prev.meals, [mealType]: {...(prev.meals[mealType] || {}), menus: newMenus}}};
+            return { ...prev, meals: { ...prev.meals, [mealType]: { ...(prev.meals[mealType] || {}), menus: newMenus } } };
         });
     }, []);
 
@@ -269,13 +269,31 @@ const App = () => {
         setDailyRecord(prev => {
             const newAlcohols = [...(prev.meals[mealType]?.alcohols || Array(5).fill({ degree: '', amount: '' }))];
             newAlcohols[index] = { ...newAlcohols[index], [field]: value };
-            return {...prev, meals: {...prev.meals, [mealType]: {...(prev.meals[mealType] || {}), alcohols: newAlcohols}}};
+            return { ...prev, meals: { ...prev.meals, [mealType]: { ...(prev.meals[mealType] || {}), alcohols: newAlcohols } } };
         });
     }, []);
 
     const handlePhotoUpload = ((mealType, index, file) => { /* 写真アップロードのロジックは省略 */ }, []);
     const handleRemovePhoto = ((mealType, index) => { /* 写真削除のロジックは省略 */ }, []);
-    
+
+
+    const handleOvertimeChange = useCallback((e) => {
+        const { value } = e.target;
+        setDailyRecord(prev => ({
+            ...prev,
+            overtime: {
+                ...prev.overtime,
+                type: value,
+                hours: value === '任意' ? prev.overtime.hours : parseFloat(value) || 0
+            }
+        }));
+    }, []);
+
+    const handleDiaryChange = useCallback((e) => {
+        const { value } = e.target;
+        setDailyRecord(prev => ({ ...prev, diary: value.slice(0, 200) }));
+    }, []);
+
     const getTotalAlcohol = useCallback((alcohols) => {
         return alcohols?.reduce((sum, a) => sum + (parseFloat(a.degree || 0) / 100) * parseFloat(a.amount || 0), 0) || 0;
     }, []);
@@ -323,7 +341,7 @@ const App = () => {
                         )}
                     </div>
                 </header>
-    
+
                 {isLoading ? (
                     <div className="flex justify-center items-center h-64">
                         <p className="text-xl text-gray-600">データを読み込み中...</p>
