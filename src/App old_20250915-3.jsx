@@ -2,51 +2,54 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, query, onSnapshot, setDoc, doc } from 'firebase/firestore';
-import { ChevronLeft, ChevronRight, BarChart2, ArrowLeft } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay, isToday, subMonths, subYears, addDays, subDays, getMonth, addMonths } from 'date-fns';
+import { ChevronLeft, ChevronRight, Download, BarChart2, ArrowLeft } from 'lucide-react';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay, isToday, subMonths, subYears, addDays, subDays } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import DailyNoteView from './components/DailyNoteView';
 
-const firebaseConfig = { /* (変更なし) */
-apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-appId: import.meta.env.VITE_FIREBASE_APP_ID
+const firebaseConfig = {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 const appId = firebaseConfig.appId;
 
-const CalendarView = React.memo(({ currentMonth, goToPrevMonth, goToNextMonth, firstDay, daysOfMonth, handleDayClick, selectedDate, dayHasRecord, setView, isToday, isSameDay }) => (
+const CalendarView = React.memo(({
+    currentMonth, goToPrevMonth, goToNextMonth, firstDay, daysOfMonth,
+    handleDayClick, selectedDate, dayHasRecord, setView, isToday, isSameDay
+}) => (
     <div className="w-full md:w-1/2 p-4 bg-gray-50 rounded-xl shadow-inner">
-    <div className="flex justify-between items-center mb-4">
-        <button onClick={goToPrevMonth} className="p-2 rounded-full hover:bg-gray-200"><ChevronLeft className="w-6 h-6" /></button>
-        <h2 className="text-2xl font-bold text-gray-800">{format(currentMonth, 'yyyy年 M月', { locale: ja })}</h2>
-        <button onClick={goToNextMonth} className="p-2 rounded-full hover:bg-gray-200"><ChevronRight className="w-6 h-6" /></button>
-    </div>
-    <div className="grid grid-cols-7 text-center font-semibold text-sm text-gray-600">
-        {['日', '月', '火', '水', '木', '金', '土'].map(day => <div key={day} className="py-2">{day}</div>)}
-    </div>
-    <div className="grid grid-cols-7 gap-1">
-        {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} className="h-10"></div>)}
-        {daysOfMonth.map(day => (
-            <button
-                key={day.toISOString()}
-                onClick={() => handleDayClick(day)}
-                className={`h-12 flex flex-col items-center justify-center rounded-lg transition-all ${isSameDay(day, selectedDate) ? 'bg-blue-500 text-white shadow-lg' : 'bg-gray-100 hover:bg-gray-200'} ${isToday(day) && !isSameDay(day, selectedDate) ? 'border-2 border-blue-500' : ''}`}
-            >
-                <span className="text-lg font-bold">{format(day, 'd')}</span>
-                {dayHasRecord(day) && <span className={`w-2 h-2 rounded-full mt-1 ${isSameDay(day, selectedDate) ? 'bg-white' : 'bg-blue-500'}`}></span>}
+        <div className="flex justify-between items-center mb-4">
+            <button onClick={goToPrevMonth} className="p-2 rounded-full hover:bg-gray-200"><ChevronLeft className="w-6 h-6" /></button>
+            <h2 className="text-2xl font-bold text-gray-800">{format(currentMonth, 'yyyy年 M月', { locale: ja })}</h2>
+            <button onClick={goToNextMonth} className="p-2 rounded-full hover:bg-gray-200"><ChevronRight className="w-6 h-6" /></button>
+        </div>
+        <div className="grid grid-cols-7 text-center font-semibold text-sm text-gray-600">
+            {['日', '月', '火', '水', '木', '金', '土'].map(day => <div key={day} className="py-2">{day}</div>)}
+        </div>
+        <div className="grid grid-cols-7 gap-1">
+            {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} className="h-10"></div>)}
+            {daysOfMonth.map(day => (
+                <button
+                    key={day.toISOString()}
+                    onClick={() => handleDayClick(day)}
+                    className={`h-12 flex flex-col items-center justify-center rounded-lg transition-all ${isSameDay(day, selectedDate) ? 'bg-blue-500 text-white shadow-lg' : 'bg-gray-100 hover:bg-gray-200'} ${isToday(day) && !isSameDay(day, selectedDate) ? 'border-2 border-blue-500' : ''}`}
+                >
+                    <span className="text-lg font-bold">{format(day, 'd')}</span>
+                    {dayHasRecord(day) && <span className={`w-2 h-2 rounded-full mt-1 ${isSameDay(day, selectedDate) ? 'bg-white' : 'bg-blue-500'}`}></span>}
+                </button>
+            ))}
+        </div>
+        <div className="mt-8 flex justify-center">
+            <button onClick={() => setView('graph')} className="bg-purple-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-purple-600 flex items-center">
+                <BarChart2 className="w-5 h-5 mr-2" />グラフを見る
             </button>
-        ))}
+        </div>
     </div>
-    <div className="mt-8 flex justify-center">
-        <button onClick={() => setView('graph')} className="bg-purple-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-purple-600 flex items-center">
-            <BarChart2 className="w-5 h-5 mr-2" />グラフを見る
-        </button>
-    </div>
-</div>
 ));
 
 const GraphView = React.memo(({ setView, graphViewRange, setGraphViewRange, chartData }) => (
@@ -57,7 +60,11 @@ const GraphView = React.memo(({ setView, graphViewRange, setGraphViewRange, char
         </div>
         <div className="flex justify-center space-x-2 mb-4">
             {['1month', '3months', '6months', '1year'].map(range => (
-                <button key={range} onClick={() => setGraphViewRange(range)} className={`py-2 px-4 rounded-full text-sm font-semibold ${graphViewRange === range ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}>
+                <button
+                    key={range}
+                    onClick={() => setGraphViewRange(range)}
+                    className={`py-2 px-4 rounded-full text-sm font-semibold ${graphViewRange === range ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                >
                     {range === '1month' ? '1ヶ月' : range === '3months' ? '3ヶ月' : range === '6months' ? '6ヶ月' : '1年'}
                 </button>
             ))}
@@ -68,8 +75,7 @@ const GraphView = React.memo(({ setView, graphViewRange, setGraphViewRange, char
                     <LineChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="date" />
-                        {/* ★★★ クラッシュしないようにYAxisを修正 ★★★ */}
-                        <YAxis domain={chartData.length > 0 ? ['dataMin - 1', 'dataMax + 1'] : [0, 100]} />
+                        <YAxis domain={['dataMin - 1', 'dataMax + 1']} />
                         <Tooltip />
                         <Line type="monotone" dataKey="体重" stroke="#8884d8" activeDot={{ r: 8 }} />
                     </LineChart>
@@ -79,6 +85,7 @@ const GraphView = React.memo(({ setView, graphViewRange, setGraphViewRange, char
     </div>
 ));
 
+// ★★★ データ構造の変更 ★★★
 const initialDailyRecord = {
     weights: { morning: {}, evening: {}, other: {} },
     meals: {
@@ -86,8 +93,7 @@ const initialDailyRecord = {
         lunch: { menus: Array(5).fill(''), photos: Array(2).fill(null) },
         dinner: { menus: Array(5).fill(''), photos: Array(2).fill(null) },
     },
-    // ★★★ アルコールを5つ入力できるように戻す ★★★
-    alcohols: Array(5).fill({ degree: '', amount: '' }),
+    alcohols: Array(1).fill({ degree: '', amount: '' }), // ★ 独立したアルコール
     overtime: { type: '0時間', hours: 0 },
     diary: '',
 };
@@ -95,7 +101,6 @@ const initialDailyRecord = {
 const App = () => {
     const [db, setDb] = useState(null);
     const [userId, setUserId] = useState(null);
-    // (他のuseStateは変更なし)
     const [allRecords, setAllRecords] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [message, setMessage] = useState('');
@@ -105,6 +110,11 @@ const App = () => {
     const [currentMonth, setCurrentMonth] = useState(() => new Date(localStorage.getItem('onigiri-note-currentMonth') || new Date()));
     const [selectedDate, setSelectedDate] = useState(() => new Date(localStorage.getItem('onigiri-note-selectedDate') || new Date()));
     const [dailyRecord, setDailyRecord] = useState(initialDailyRecord);
+
+    const showMessage = (msg) => {
+        setMessage(msg);
+        setTimeout(() => setMessage(''), 3000);
+    };
 
     useEffect(() => {
         const app = initializeApp(firebaseConfig);
@@ -138,22 +148,15 @@ const App = () => {
         localStorage.setItem('onigiri-note-selectedDate', selectedDate.toISOString());
     }, [currentMonth, selectedDate]);
 
-    // ★★★ 月ビューを同期させるuseEffectを追加 ★★★
-    useEffect(() => {
-        if (getMonth(selectedDate) !== getMonth(currentMonth)) {
-            setCurrentMonth(startOfMonth(selectedDate));
-        }
-    }, [selectedDate, currentMonth]);
-
     const daysOfMonth = useMemo(() => eachDayOfInterval({ start: startOfMonth(currentMonth), end: endOfMonth(currentMonth) }), [currentMonth]);
     const firstDay = useMemo(() => getDay(startOfMonth(currentMonth)), [currentMonth]);
     const dayHasRecord = useCallback(date => !!allRecords[format(date, 'yyyy-MM-dd')], [allRecords]);
     
-    // ★★★ クラッシュしないように月のナビゲーションを修正 ★★★
     const goToPrevMonth = useCallback(() => setCurrentMonth(prev => subMonths(prev, 1)), []);
     const goToNextMonth = useCallback(() => setCurrentMonth(prev => addMonths(prev, 1)), []);
-
     const handleDayClick = useCallback(date => { setSelectedDate(date); setView('daily'); }, []);
+    
+    // ★★★ 日次ビューのナビゲーション関数 ★★★
     const goToPrevDay = useCallback(() => setSelectedDate(prev => subDays(prev, 1)), []);
     const goToNextDay = useCallback(() => setSelectedDate(prev => addDays(prev, 1)), []);
 
@@ -165,18 +168,18 @@ const App = () => {
         try {
             await setDoc(doc(db, `artifacts/${appId}/users/${userId}/daily-records`, dateKey), dailyRecord, { merge: true });
             showMessage("記録を保存しました！");
-            setView('calendar');
+            setView('calendar'); // ★★★ 保存後にカレンダーに戻る ★★★
         } catch (error) { console.error("Save Error:", error); showMessage("保存に失敗しました。");}
         finally { setIsSaving(false); }
     }, [db, userId, selectedDate, dailyRecord]);
     
-    // (handleWeightChange, handleMealMenuChangeは変更なし)
     const handleWeightChange = useCallback((type, field, value) => setDailyRecord(p => ({ ...p, weights: { ...p.weights, [type]: { ...(p.weights[type] || {}), [field]: value } } })), []);
     const handleMealMenuChange = useCallback((mealType, index, value) => setDailyRecord(p => { const n = [...p.meals[mealType].menus]; n[index] = value; return { ...p, meals: { ...p.meals, [mealType]: { ...p.meals[mealType], menus: n } } }; }), []);
     
-    const handleAlcoholChange = useCallback((index, field, value) => setDailyRecord(p => { const n = [...(p.alcohols || [])]; n[index] = { ...n[index], [field]: value }; return { ...p, alcohols: n }; }), []);
+    // ★★★ 新しいアルコール処理関数 ★★★
+    const handleAlcoholChange = useCallback((index, field, value) => { setDailyRecord(p => { const n = [...p.alcohols]; n[index] = { ...n[index], [field]: value }; return { ...p, alcohols: n }; }); }, []);
     
-    // ★★★ 写真リサイズ処理を完全な形で復活 ★★★
+    // ★★★ 写真アップロード処理を復活＆修正 ★★★
     const handlePhotoUpload = (mealType, index, file) => {
         if (!file) return;
         const reader = new FileReader();
@@ -191,7 +194,6 @@ const App = () => {
                 canvas.width = width; canvas.height = height;
                 canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                 canvas.toBlob(blob => {
-                    if (!blob) return;
                     const r = new FileReader();
                     r.readAsDataURL(blob);
                     r.onloadend = () => setDailyRecord(p => { const n = [...p.meals[mealType].photos]; n[index] = r.result; return { ...p, meals: { ...p.meals, [mealType]: { ...p.meals[mealType], photos: n } } }; });
@@ -207,9 +209,7 @@ const App = () => {
     const handleDiaryChange = useCallback((e) => { const v = e.target.value; setDailyRecord(p => ({ ...p, diary: v.slice(0, 200) })); }, []);
     const getTotalAlcohol = useCallback((alcohols) => alcohols?.reduce((sum, a) => sum + (parseFloat(a.degree || 0) / 100) * parseFloat(a.amount || 0), 0) || 0, []);
 
-    const chartData = useMemo(() => {
-        // (chartDataのロジックは変更なし)
-    }, [allRecords, graphViewRange]);
+    const chartData = useMemo(() => { /* (変更なし) */ }, [allRecords, graphViewRange]);
 
     return (
         <div className="min-h-screen bg-gray-100 p-4 font-inter flex items-center justify-center">

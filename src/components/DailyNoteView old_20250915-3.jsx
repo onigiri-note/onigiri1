@@ -4,10 +4,21 @@ import { ja } from 'date-fns/locale';
 import { Camera, Activity, FileText, ArrowLeft, Clock, XCircle, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const DailyNoteView = ({
-  selectedDate, dailyRecord, isSaving, handleSaveRecord, setView,
-  goToPrevDay, goToNextDay, handleWeightChange, handleMealMenuChange,
-  handleAlcoholChange, handlePhotoUpload, handleRemovePhoto,
-  handleOvertimeChange, handleDiaryChange, getTotalAlcohol
+  selectedDate,
+  dailyRecord,
+  isSaving,
+  handleSaveRecord,
+  setView,
+  goToPrevDay, // ★ 追加
+  goToNextDay, // ★ 追加
+  handleWeightChange,
+  handleMealMenuChange,
+  handleAlcoholChange, // ★ 変更
+  handlePhotoUpload,
+  handleRemovePhoto,
+  handleOvertimeChange,
+  handleDiaryChange,
+  getTotalAlcohol
 }) => {
 
   if (!selectedDate || !isValid(new Date(selectedDate))) {
@@ -19,17 +30,16 @@ const DailyNoteView = ({
       <div className="flex justify-between items-center mb-4">
         <button onClick={() => setView('calendar')} className="p-2 rounded-full hover:bg-gray-200"><ArrowLeft /></button>
         <div className="flex items-center space-x-2">
-          <button onClick={goToPrevDay} className="p-2 rounded-full hover:bg-gray-200"><ChevronLeft /></button>
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800 whitespace-nowrap">
-            {format(new Date(selectedDate), 'yyyy年 M月 d日', { locale: ja })}
-          </h2>
-          <button onClick={goToNextDay} className="p-2 rounded-full hover:bg-gray-200"><ChevronRight /></button>
+            <button onClick={goToPrevDay} className="p-2 rounded-full hover:bg-gray-200"><ChevronLeft /></button>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 whitespace-nowrap">
+              {format(new Date(selectedDate), 'yyyy年 M月 d日', { locale: ja })}
+            </h2>
+            <button onClick={goToNextDay} className="p-2 rounded-full hover:bg-gray-200"><ChevronRight /></button>
         </div>
-        <div className="w-10"></div>
+        <div className="w-10"></div> {/* スペーサー */}
       </div>
 
       <form onSubmit={handleSaveRecord} className="space-y-6">
-        {/* (体重と食事のセクションは変更なし) */}
         {/* 体重の記録 */}
         <div>
           <h3 className="text-xl font-bold text-gray-700 mb-2 flex items-center"><Activity className="w-5 h-5 mr-2" />体重の記録</h3>
@@ -82,23 +92,21 @@ const DailyNoteView = ({
             </div>
           ))}
         </div>
-        {/* ... */}
         
-        {/* ★★★ アルコールの記録（複数入力版） ★★★ */}
+        {/* ★★★ アルコールの記録（独立したセクション） ★★★ */}
         <div>
-          <h3 className="text-xl font-bold text-gray-700 mb-2 flex items-center">🍺 アルコールの記録</h3>
-          <div className="bg-white p-4 rounded-lg shadow-sm mb-2 space-y-2">
-            {dailyRecord.alcohols?.map((alcohol, index) => (
-              <div key={index} className="flex space-x-2">
-                <input type="number" value={alcohol.degree} onChange={(e) => handleAlcoholChange(index, 'degree', e.target.value)} className="w-1/3 rounded-md border-gray-300 shadow-sm" placeholder={`度数 ${index + 1} (%)`} />
-                <input type="number" value={alcohol.amount} onChange={(e) => handleAlcoholChange(index, 'amount', e.target.value)} className="w-2/3 rounded-md border-gray-300 shadow-sm" placeholder={`飲酒量 ${index + 1} (ml)`} />
-              </div>
-            ))}
-            <p className="text-sm text-gray-500 pt-2">合計アルコール量: {getTotalAlcohol(dailyRecord.alcohols).toFixed(2)} ml</p>
-          </div>
+            <h3 className="text-xl font-bold text-gray-700 mb-2 flex items-center">🍺 アルコールの記録</h3>
+            <div className="bg-white p-4 rounded-lg shadow-sm mb-2">
+                {dailyRecord.alcohols?.map((alcohol, index) => (
+                    <div key={index} className="flex space-x-2">
+                        <input type="number" value={alcohol.degree} onChange={(e) => handleAlcoholChange(index, 'degree', e.target.value)} className="w-1/3 rounded-md border-gray-300 shadow-sm" placeholder="度数 (%)" />
+                        <input type="number" value={alcohol.amount} onChange={(e) => handleAlcoholChange(index, 'amount', e.target.value)} className="w-2/3 rounded-md border-gray-300 shadow-sm" placeholder="飲酒量 (ml)" />
+                    </div>
+                ))}
+                <p className="text-sm text-gray-500 mt-2">合計アルコール量: {getTotalAlcohol(dailyRecord.alcohols).toFixed(2)} ml</p>
+            </div>
         </div>
 
-        {/* (残業と日記のセクションは変更なし) */}
         {/* 残業時間 */}
         <div>
           <h3 className="text-xl font-bold text-gray-700 mb-2 flex items-center"><Clock className="w-5 h-5 mr-2" />残業時間</h3>
@@ -119,7 +127,6 @@ const DailyNoteView = ({
           <textarea value={dailyRecord.diary} onChange={handleDiaryChange} rows="4" maxLength="200" className="block w-full rounded-md border-gray-300 shadow-sm" placeholder="今日の出来事を200文字までで記録しましょう。"></textarea>
           <p className="text-right text-sm text-gray-500">{dailyRecord.diary.length}/200</p>
         </div>
-        {/* ... */}
 
         <button type="submit" disabled={isSaving} className="w-full bg-green-500 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:bg-green-600 flex items-center justify-center">
           {isSaving ? "保存中..." : "今日の記録を保存"}
